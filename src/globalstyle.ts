@@ -1,4 +1,4 @@
-import {createGlobalStyle} from "styled-components";
+import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
 	body{
@@ -9,3 +9,12 @@ export const GlobalStyle = createGlobalStyle`
 		/* height: 100vh; */
 	}
 `
+
+export const theme ={
+	background: "#484c4d",
+	displayBackgronud: "#a6aeb0",
+	numberBackground: "#4f5465",
+	operatorsBackground: "#8e27e3",
+	numberText: "#fff"
+
+}
