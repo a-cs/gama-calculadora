@@ -11,21 +11,27 @@ function App() {
 
 	const [display, setDisplay] = useState("")
 	const [displayResult, setDisplayResult] = useState("")
+	const [decimal, setDecimal] = useState(false)
 
 	const addValueToDisplay = (value:string) => {
 		if ((ops.includes(value) && display === "")
 			|| ((ops.includes(value) && ops.includes(display.slice(-1)))
-			&& value === display.slice(-1)))
+			&& value === display.slice(-1)) || ((value === ",") && decimal))
 			return
-		if ((ops.includes(value) && ops.includes(display.slice(-1))
+		else if ((ops.includes(value) && ops.includes(display.slice(-1))
 			&& value !== display.slice(-1)))
 			setDisplay(display.slice(0,-1) + value)
-		else
+		else {
 			setDisplay(display + value)
+			if(value === ",")
+				setDecimal(true)
+			if(ops.slice(0, -1).includes(value))
+				setDecimal(false)
+		}
 	}
 
 	const calculate = () => {
-		setDisplayResult(`= ${eval(display.replace("x", "*")).toString()}`)
+		setDisplayResult(`=${eval(display.replace("x", "*")).toString()}`)
 	}
 
 	const clearDisplay = () => {
@@ -34,15 +40,19 @@ function App() {
 	}
 
 	const deleteLastValueOnDisplay = () => {
-			setDisplay(display.slice(0, -1))
+		if(display.slice(-1) === ",")
+			setDecimal(false)
+		setDisplay(display.slice(0, -1))
 	}
 		return (
 		<Container>
 			<DisplayContainer>
-
-				{display || "0"}
-				<br/>
-				{displayResult || ""}
+				<div className="display">
+					{display || "0"}
+				</div>
+				<div className="result">
+					{displayResult || ""}
+				</div>
 			</DisplayContainer>
 			<LeftContainer>
 				<NumberButton
