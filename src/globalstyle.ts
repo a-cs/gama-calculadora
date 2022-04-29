@@ -12,9 +12,11 @@ export const GlobalStyle = createGlobalStyle`
 
 export const theme ={
 	background: "#484c4d",
-	displayBackgronud: "#a6aeb0",
-	numberBackground: "#4f5465",
+	displayBackground: "#a6aeb0",
+	displayText: "#0f110c",
 	operatorsBackground: "#8e27e3",
+	operatorsBackgroundDisabled: "#Cc54d7",
+	numberBackground: "#4f5465",
 	numberText: "#fff"
 
 }

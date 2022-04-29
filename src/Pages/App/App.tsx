@@ -5,50 +5,57 @@ import { FiDelete } from "react-icons/fi";
 import { Container, NumberButton, LeftContainer, DisplayContainer, RightContainer } from "./style";
 
 function App() {
-	const digits = ["7","8","9","4","5","6","1","2","3","0",","]
+	const digits = ["7","8","9","4","5","6","1","2","3","0"]
 	const operators = ["x", "-", "+"]
 	const ops = ['/', 'x', '-', '+', ',']
 
-	const [display, setDisplay] = useState("")
+	const [display, setDisplay] = useState("0")
 	const [displayResult, setDisplayResult] = useState("")
-	const [decimal, setDecimal] = useState(false)
+	const [isDecimal, setIsDecimal] = useState(false)
+	const [isDisabled, setIsDisabled] = useState(false)
 
 	const addValueToDisplay = (value:string) => {
 		if ((ops.includes(value) && display === "")
 			|| ((ops.includes(value) && ops.includes(display.slice(-1)))
-			&& value === display.slice(-1)) || ((value === ",") && decimal))
+			&& value === display.slice(-1)) || ((value === ",") && isDecimal))
 			return
 		else if ((ops.includes(value) && ops.includes(display.slice(-1))
-			&& value !== display.slice(-1)))
+			&& value !== display.slice(-1)) && value !== ",")
 			setDisplay(display.slice(0,-1) + value)
 		else {
 			setDisplay(display + value)
 			if(value === ",")
-				setDecimal(true)
-			if(ops.slice(0, -1).includes(value))
-				setDecimal(false)
+				setIsDecimal(true)
+			if(ops.slice(0, -1).includes(value)){
+				setIsDecimal(false)
+				setIsDisabled(true)
+			}
+			else
+				setIsDisabled(false)
 		}
 	}
 
 	const calculate = () => {
-		setDisplayResult(`=${eval(display.replace("x", "*")).toString()}`)
+		const result = eval(display.replace(/x/g, "*").replace(/,/g,".")).toString().replace(".",",")
+		setDisplayResult(`= ${result}`)
 	}
 
 	const clearDisplay = () => {
-		setDisplay("")
+		setDisplay("0")
 		setDisplayResult("")
+		setIsDecimal(false)
 	}
 
 	const deleteLastValueOnDisplay = () => {
 		if(display.slice(-1) === ",")
-			setDecimal(false)
+			setIsDecimal(false)
 		setDisplay(display.slice(0, -1))
 	}
 		return (
 		<Container>
 			<DisplayContainer>
 				<div className="display">
-					{display || "0"}
+					{display}
 				</div>
 				<div className="result">
 					{displayResult || ""}
@@ -81,6 +88,12 @@ function App() {
 						{digit}
 					</NumberButton>
 				))}
+				<NumberButton
+					disabled = {isDecimal}
+					onClick = {() => addValueToDisplay(",")}
+					>
+						,
+					</NumberButton>
 			</LeftContainer>
 			<RightContainer>
 				{operators.map(operator => (
@@ -93,6 +106,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
+					disabled = {isDisabled}
 					isOperator
 					onClick = {() => calculate()}
 				>

@@ -25,13 +25,15 @@ export const DisplayContainer = styled.div`
 	grid-auto-columns: 74px;
 	grid-auto-rows: 60px;
 	overflow: auto;
-	color: ${props => props.theme.displayBackgronud};
+	color: ${props => props.theme.displayText};
 	font-family: 'Share Tech', sans-serif;
 	font-size: 40px;
 	text-align: right;
-	border: 5px solid ${props => props.theme.resultBackgronud};
+	background-color: ${props => props.theme.displayBackground};
+	border: 5px solid ${props => props.theme.displayBackground};
 	border-radius: 8px 8px 6px 6px;
 	padding: 4px 12px;
+	margin-bottom: 4px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -70,7 +72,9 @@ export const NumberButton = styled.button<ButtonProps> `
 	grid-row: ${props => props.children === "=" ? "4 / span 2": "0"};
 	transition: 0.2s;
 	&:hover {
-		opacity: 0.6;
+		opacity: 0.7;
 	}
-
+	&:disabled {
+		opacity: 0.3;
+	}
 `
