@@ -1,5 +1,5 @@
 /* eslint-disable no-eval */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiDelete } from "react-icons/fi";
 
 import { Container, NumberButton, LeftContainer, DisplayContainer, RightContainer } from "./style";
@@ -11,13 +11,19 @@ function App() {
 
 	const [display, setDisplay] = useState("")
 	const [displayResult, setDisplayResult] = useState("")
-	const [isDecimal, setIsDecimal] = useState(false)
-	const [isDisabled, setIsDisabled] = useState(false)
+	const [isDecimalDisabled, setIsDecimalDisabled] = useState(false)
+	const [isEqualDisabled, setIsEqualDisabled] = useState(false)
+
+	useEffect(() => {
+		ops.includes(display.slice(-1)) ? setIsEqualDisabled(true) : setIsEqualDisabled(false)
+	},[display, ops])
+
+
 
 	const addValueToDisplay = (value:string) => {
 		if ((ops.includes(value) && display === "" && value !== ",")
 			|| ((ops.includes(value) && ops.includes(display.slice(-1)))
-			&& value === display.slice(-1)) || ((value === ",") && isDecimal))
+			&& value === display.slice(-1)) || ((value === ",") && isDecimalDisabled))
 			return
 		else if ((ops.includes(value) && ops.includes(display.slice(-1))
 			&& value !== display.slice(-1)) && value !== ",")
@@ -27,39 +33,34 @@ function App() {
 				setDisplay(display + "0,")
 			else
 				setDisplay(display + value)
-			if(value === ","){
-				setIsDecimal(true)
-				setIsDisabled(true)
-			}
-			if(ops.slice(0, -1).includes(value)){
-				setIsDecimal(false)
-				setIsDisabled(true)
-			}
-			else
-				setIsDisabled(false)
+			if(value === ",")
+				setIsDecimalDisabled(true)
+			if(ops.slice(0, -1).includes(value))
+				setIsDecimalDisabled(false)
 		}
-		console.log(`disabled = ${isDisabled}`)
 	}
 
 	const calculate = () => {
-		let result
-		if (display !== ""){
-			result = eval(display.replace(/x/g, "*").replace(/,/g,".")).toString().replace(".",",")
+		if (!ops.includes(display.slice(-1))){
+			let result
+			if (display !== ""){
+				result = eval(display.replace(/x/g, "*").replace(/,/g,".")).toString().replace(".",",")
+			}
+			else
+				result = 0
+			setDisplayResult(`= ${result}`)
 		}
-		else
-			result = 0
-		setDisplayResult(`= ${result}`)
 	}
 
 	const clearDisplay = () => {
 		setDisplay("")
 		setDisplayResult("")
-		setIsDecimal(false)
+		setIsDecimalDisabled(false)
 	}
 
 	const deleteLastValueOnDisplay = () => {
 		if(display.slice(-1) === ",")
-			setIsDecimal(false)
+			setIsDecimalDisabled(false)
 		setDisplay(display.slice(0, -1))
 	}
 		return (
@@ -100,7 +101,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
-					disabled = {isDecimal}
+					disabled = {isDecimalDisabled}
 					onClick = {() => addValueToDisplay(",")}
 					>
 						,
@@ -117,7 +118,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
-					disabled = {isDisabled}
+					disabled = {isEqualDisabled}
 					isOperator
 					onClick = {() => calculate()}
 				>
