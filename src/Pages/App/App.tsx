@@ -7,71 +7,93 @@ import { Container, NumberButton, LeftContainer, DisplayContainer, RightContaine
 function App() {
 	const leftContainer = ["7","8","9","4","5","6","1","2","3","0"]
 	const rightContainer = ["x", "-", "+"]
-	const operators = ['/', 'x', '-', '+', ',']
+	const operators = ['/', 'x', '-', '+']
 
-	const [display, setDisplay] = useState("")
-	const [displayResult, setDisplayResult] = useState("")
+	const [displayUpper, setDisplayUpper] = useState("")
+	const [displayLower, setDisplayLower] = useState("")
 	const [isDecimalDisabled, setIsDecimalDisabled] = useState(false)
 
 	const addValueToDisplay = (value:string) => {
-		if (operators.includes(value) && display === "" && value !== ",")
-			return
-		else if (operators.includes(value) && operators.includes(display.slice(-1)) && value === display.slice(-1))
-			return
-		else if (value === "," && isDecimalDisabled)
-			return
-		else if (value === "0"
-			&& (display === "0" || (operators.slice(0,-1).includes(display.slice(-2,-1))
-			&& display.slice(-1) === "0")))
-			return
-		else if ((operators.includes(value) && operators.includes(display.slice(-1))
-			&& value !== display.slice(-1)) && value !== ",")
-			setDisplay(display.slice(0,-1) + value)
-		else {
-			if(value ==="," && (display === "" || operators.includes(display.slice(-1))))
-				setDisplay(display + "0,")
-			else if ((display === "0" || (operators.slice(0,-1).includes(display.slice(-2,-1)) && display.slice(-1) === "0")) && !operators.includes(value))
-				setDisplay(display.slice(0, -1) + value)
-			else
-				setDisplay(display + value)
-			if(value === ",")
+		if(!operators.includes(value)){
+			if(displayUpper.slice(-1) === "="){
+				setDisplayUpper("")
+				if(value === ","){
+					setIsDecimalDisabled(true)
+					setDisplayLower("0,")
+				}
+				else
+					setDisplayLower(value)
+			} else if(value === "," && !isDecimalDisabled){
 				setIsDecimalDisabled(true)
-			if(operators.slice(0, -1).includes(value))
+				if(displayLower === "")
+					setDisplayLower(displayLower + "0,")
+				else
+					setDisplayLower(displayLower + value)
+			} else {
+				if(displayLower === "0")
+					setDisplayLower(value)
+				else
+					setDisplayLower(displayLower + value)
+			}
+		} else {
+			if(!displayLower && displayUpper.slice(-1) === value)
+				return
+			else if(displayUpper && !displayLower && displayUpper.slice(-1) !== value)
+				setDisplayUpper(displayUpper.slice(0, -1) + value)
+			else if(displayUpper.slice(-1) === "="){
+				setDisplayUpper(displayLower + value)
+				setDisplayLower("")
+			}
+			else{
+				if(!displayLower)
+				setDisplayUpper(displayUpper + "0" + value)
+				else{
+					if(displayLower.slice(-1) === ",")
+						setDisplayUpper(displayUpper + displayLower.slice(0,-1) + value)
+					else
+					setDisplayUpper(displayUpper + displayLower + value)
+				}
+				setDisplayLower("")
 				setIsDecimalDisabled(false)
+			}
 		}
 	}
 
 	const calculate = () => {
-		if (!operators.includes(display.slice(-1))){
-			let result
-			if (display !== ""){
-				result = eval(display.replace(/x/g, "*").replace(/,/g,".")).toString().replace(".",",")
-			}
-			else
-				result = 0
-			setDisplayResult(`= ${result}`)
-		}
+		const upper = displayUpper
+		let lower
+		if(displayLower === "")
+			lower = "0"
+		else if(displayLower.slice(-1) === ",")
+			lower = displayLower.slice(0,-1)
+		else
+			lower = displayLower
+		const joinedString = upper + lower
+		const result = eval(joinedString.replace(/x/g, "*").replace(/,/g,".")).toLocaleString('pt-BR', {maximumFractionDigits: 20})
+		setDisplayUpper(joinedString + " =")
+		setDisplayLower(result)
+		setIsDecimalDisabled(false)
 	}
 
 	const clearDisplay = () => {
-		setDisplay("")
-		setDisplayResult("")
+		setDisplayUpper("")
+		setDisplayLower("")
 		setIsDecimalDisabled(false)
 	}
 
 	const deleteLastValueOnDisplay = () => {
-		if(display.slice(-1) === ",")
+		if(displayLower.slice(-1) === ",")
 			setIsDecimalDisabled(false)
-		setDisplay(display.slice(0, -1))
+		setDisplayLower(displayLower.slice(0, -1))
 	}
 		return (
 		<Container>
 			<DisplayContainer>
 				<div className="display">
-					{display || "0"}
+					{displayUpper || ""}
 				</div>
 				<div className="result">
-					{displayResult || ""}
+					{displayLower || "0"}
 				</div>
 			</DisplayContainer>
 			<LeftContainer>
@@ -79,9 +101,10 @@ function App() {
 				isOperator
 				onClick = {() => clearDisplay()}
 				>
-					CE
+					C
 				</NumberButton>
 				<NumberButton
+				disabled = {displayUpper.slice(-1) === "="}
 				isOperator
 				onClick = {() => deleteLastValueOnDisplay()}
 				>
@@ -119,7 +142,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
-					disabled = {operators.includes(display.slice(-1))}
+					disabled = {displayUpper.slice(-1) === "="}
 					isOperator
 					onClick = {() => calculate()}
 				>
