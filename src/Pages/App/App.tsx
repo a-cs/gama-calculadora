@@ -1,5 +1,5 @@
 /* eslint-disable no-eval */
-import { useEffect, useState} from "react";
+import { useState} from "react";
 import { FiDelete } from "react-icons/fi";
 
 import { Container, NumberButton, LeftContainer, DisplayContainer, RightContainer } from "./style";
@@ -30,6 +30,8 @@ function App() {
 		else {
 			if(value ==="," && (display === "" || operators.includes(display.slice(-1))))
 				setDisplay(display + "0,")
+			else if ((display === "0" || (operators.slice(0,-1).includes(display.slice(-2,-1)) && display.slice(-1) === "0")) && !operators.includes(value))
+				setDisplay(display.slice(0, -1) + value)
 			else
 				setDisplay(display + value)
 			if(value === ",")
