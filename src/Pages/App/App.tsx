@@ -12,13 +12,6 @@ function App() {
 	const [display, setDisplay] = useState("")
 	const [displayResult, setDisplayResult] = useState("")
 	const [isDecimalDisabled, setIsDecimalDisabled] = useState(false)
-	const [isEqualDisabled, setIsEqualDisabled] = useState(false)
-
-	useEffect(() => {
-		['/', 'x', '-', '+', ','].includes(display.slice(-1)) ? setIsEqualDisabled(true) : setIsEqualDisabled(false)
-	},[display])
-
-
 
 	const addValueToDisplay = (value:string) => {
 		if (operators.includes(value) && display === "" && value !== ",")
@@ -124,7 +117,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
-					disabled = {isEqualDisabled}
+					disabled = {operators.includes(display.slice(-1))}
 					isOperator
 					onClick = {() => calculate()}
 				>

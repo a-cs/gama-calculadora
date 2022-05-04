@@ -5,8 +5,10 @@ interface ButtonProps {
 }
 
 export const Container = styled.div`
-	max-width: 300px;
-	margin: 200px auto;
+	box-sizing: border-box;
+	max-width: 365px;
+	height: 500px;
+	margin: 25vh auto;
 	padding: 32px;
 	border-radius: 24px;
 	background-color: ${props => props.theme.background};
