@@ -8,10 +8,13 @@ function App() {
 	const leftContainer = ["7","8","9","4","5","6","1","2","3","0"]
 	const rightContainer = ["x", "-", "+"]
 	const operators = ['/', 'x', '-', '+']
+	const maxDecimalPlaces = 3
 
 	const [displayUpper, setDisplayUpper] = useState("")
 	const [displayLower, setDisplayLower] = useState("")
 	const [isDecimalDisabled, setIsDecimalDisabled] = useState(false)
+	const [decimalPlaces, setDecimalPlaces] = useState(0)
+	const [error, setError] = useState(false)
 
 	const addValueToDisplay = (value:string) => {
 		if(!operators.includes(value)){
@@ -25,6 +28,7 @@ function App() {
 					setDisplayLower(value)
 			} else if(value === "," && !isDecimalDisabled){
 				setIsDecimalDisabled(true)
+				setDecimalPlaces(0)
 				if(displayLower === "")
 					setDisplayLower(displayLower + "0,")
 				else
@@ -32,8 +36,11 @@ function App() {
 			} else {
 				if(displayLower === "0")
 					setDisplayLower(value)
-				else
+				else{
+					if(isDecimalDisabled)
+						setDecimalPlaces(decimalPlaces + 1)
 					setDisplayLower(displayLower + value)
+				}
 			}
 		} else {
 			if(!displayLower && displayUpper.slice(-1) === value)
@@ -55,6 +62,7 @@ function App() {
 				}
 				setDisplayLower("")
 				setIsDecimalDisabled(false)
+				setDecimalPlaces(0)
 			}
 		}
 	}
@@ -69,22 +77,38 @@ function App() {
 		else
 			lower = displayLower
 		const joinedString = upper + lower
-		const result = eval(joinedString.replace(/x/g, "*").replace(/,/g,".")).toLocaleString('pt-BR', {maximumFractionDigits: 20})
+		const formatedString = joinedString.replace(/x/g, "*").replace(/\./g,"").replace(/,/g,".")
+		const result:number = eval(formatedString)
+		let formatedResult
+		if(isNaN(result)){
+			setError(true)
+			formatedResult = "O valor não é um número"
+		} else if (!isFinite(result)){
+			setError(true)
+			formatedResult = result.toLocaleString("pt-Br")
+		}
+		else
+			formatedResult = String(parseFloat(result.toFixed(maxDecimalPlaces))).replace(/\./g,",")
 		setDisplayUpper(joinedString + " =")
-		setDisplayLower(result)
+		setDisplayLower(formatedResult)
 		setIsDecimalDisabled(false)
+		setDecimalPlaces(0)
 	}
 
 	const clearDisplay = () => {
 		setDisplayUpper("")
 		setDisplayLower("")
 		setIsDecimalDisabled(false)
+		setDecimalPlaces(0)
+		setError(false)
 	}
 
 	const deleteLastValueOnDisplay = () => {
 		if(displayLower.slice(-1) === ",")
 			setIsDecimalDisabled(false)
 		setDisplayLower(displayLower.slice(0, -1))
+		if(isDecimalDisabled)
+			setDecimalPlaces(decimalPlaces - 1)
 	}
 		return (
 		<Container>
@@ -104,13 +128,14 @@ function App() {
 					C
 				</NumberButton>
 				<NumberButton
-				disabled = {displayUpper.slice(-1) === "="}
+				disabled = {displayUpper.slice(-1) === "=" || error}
 				isOperator
 				onClick = {() => deleteLastValueOnDisplay()}
 				>
 					<FiDelete />
 				</NumberButton>
 				<NumberButton
+				disabled = {error}
 				isOperator
 				onClick = {() => addValueToDisplay("/")}
 				>
@@ -118,6 +143,7 @@ function App() {
 				</NumberButton>
 				{leftContainer.map(item => (
 					<NumberButton
+					disabled = {decimalPlaces >= maxDecimalPlaces || error}
 					onClick = {() => addValueToDisplay(item)}
 					key = {item}
 					>
@@ -125,7 +151,7 @@ function App() {
 					</NumberButton>
 				))}
 				<NumberButton
-					disabled = {isDecimalDisabled}
+					disabled = {isDecimalDisabled || error}
 					onClick = {() => addValueToDisplay(",")}
 					>
 						,
@@ -134,6 +160,7 @@ function App() {
 			<RightContainer>
 				{rightContainer.map(item => (
 					<NumberButton
+					disabled = {error}
 					isOperator
 					onClick = {() => addValueToDisplay(item)}
 					key = {item}
